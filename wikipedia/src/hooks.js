@@ -1,8 +1,8 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useState, useRef} from 'react';
 
 import axios from 'axios';
 
-const useSearch=(query)=>{
+export const useSearch=(query)=>{
 
     const [state,setState]= useState({
         articles: [],
@@ -10,10 +10,30 @@ const useSearch=(query)=>{
         error: ''
     });
 
+
+    const cancelToken= useRef(null);
+
+
     useEffect(async() => {
+        
+        if(query.length<3){
+            return;
+        }
+
+        //if  request is null, then cancel it
+        if(cancelToken.current){
+            
+            cancelToken.current.cancel();
+        }
+
+        //cancel token is created that if input changed we can cancel our request before the rest loads, helpful for slow browsers
+        cancelToken.current=axios.CancelToken.source();
+
         try{
         //origin=* is a way of getting past cross origin
-          let data=await axios.get(`const url='https://en.wikipedia.org/w/api.php?origin=*&action=opensearch&search='${query}`)
+          let data=await axios.get(`https://en.wikipedia.org/w/api.php?origin=*&action=opensearch&search=${query}`,{
+              cancelToken: cancelToken.current.token
+          })
           
           let parsedResponse=[];
     
@@ -31,6 +51,10 @@ const useSearch=(query)=>{
           })
           
         }catch(e){
+            if(axios.isCancel(e)){
+                // console.log('catch canceled')
+                return;
+            }
 
           setState({
               articles:[],
@@ -38,11 +62,32 @@ const useSearch=(query)=>{
               error: e
           })
 
+         
         }
         
-      }, [query])
+      }, [query]);
 
       return state;
 }
 
-export default useSearch;
+// we set a preset paramter for delay of 500 if nothing is sent through
+export const useDebounce=(value,delay=500)=>{
+  const [debouncedValue,setDebouncedValue]=useState(value);
+
+  useEffect(()=>{
+
+    const timer= setTimeout(()=>{
+      setDebouncedValue(value)
+    },delay)
+
+    return ()=>{
+      clearTimeout(timer)
+    }
+    
+  },[value,delay])
+
+  return debouncedValue;
+
+}
+
+// export default useSearch;

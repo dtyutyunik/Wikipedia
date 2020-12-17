@@ -1,20 +1,23 @@
 // import './App.css';
 import ReactAutocomplete from 'react-autocomplete';
 import {useState,useEffect} from 'react';
-import useSearch from './hooks.js'
+import {useSearch, useDebounce} from './hooks.js'
 
 
 function App() {
   
   const [value,setValue]=useState('');
   //custom hook
-  const {articles,status,error}=useSearch(value);
+
+  // const {articles,status,error}=useSearch(value);
+  //we set a delay of half a second to our useSearch
+  const {articles}=useSearch(useDebounce(value));
 
 
   return (
-    <div>
-      <p>Status {status}</p>
-      <p>Error: {error}</p>
+    <>
+      {/* <p>Status {status}</p>
+      <p>Error: {error}</p> */}
 
       <ReactAutocomplete
           items={articles}
@@ -34,7 +37,7 @@ function App() {
         
         />
 
-    </div>
+    </>
   );
 }
 
