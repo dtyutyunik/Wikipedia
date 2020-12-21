@@ -1,44 +1,27 @@
-// import './App.css';
-import ReactAutocomplete from 'react-autocomplete';
-import {useState,useEffect} from 'react';
-import {useSearch, useDebounce} from './hooks.js'
+import Home from './pages/Home'
+import Error from './pages/Error'
+import Search from './pages/Search'
+
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from 'react-router-dom';
 
 
-function App() {
-  
-  const [value,setValue]=useState('');
-  //custom hook
+const App=()=> (
+  <Router>
+    <Switch>
+      <Route exact path='/' component={Home}/>
+      <Route path='/search' component={Search}/>
+      <Route component={Error}/>
 
-  // const {articles,status,error}=useSearch(value);
-  //we set a delay of half a second to our useSearch
-  const {articles}=useSearch(useDebounce(value));
+    </Switch>
+  </Router>
 
-
-  return (
-    <>
-      {/* <p>Status {status}</p>
-      <p>Error: {error}</p> */}
-
-      <ReactAutocomplete
-          items={articles}
-          shouldItemRender={(item, value) => item.label.toLowerCase().indexOf(value.toLowerCase()) > -1}
-          getItemValue={item => item.label}
-          renderItem={(item, highlighted) =>
-            <div
-              key={item.id}
-              style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
-            >
-              {item.label}
-            </div>
-          }
-
-          value={value}
-          onChange={e=>setValue(e.target.value)}
-        
-        />
-
-    </>
-  );
-}
+    
+    
+)
 
 export default App;

@@ -1,8 +1,8 @@
-import {useEffect,useState, useRef} from 'react';
+import {useEffect,useState, useRef, useCallback} from 'react';
 
 import axios from 'axios';
 
-export const useSearch=(query)=>{
+export const useSearch=(query, limit=10)=>{
 
     const [state,setState]= useState({
         articles: [],
@@ -22,7 +22,6 @@ export const useSearch=(query)=>{
 
         //if  request is null, then cancel it
         if(cancelToken.current){
-            
             cancelToken.current.cancel();
         }
 
@@ -31,7 +30,7 @@ export const useSearch=(query)=>{
 
         try{
         //origin=* is a way of getting past cross origin
-          let data=await axios.get(`https://en.wikipedia.org/w/api.php?origin=*&action=opensearch&search=${query}`,{
+          let data=await axios.get(`https://en.wikipedia.org/w/api.php?origin=*&action=opensearch&search=${query}&limit=${limit}`,{
               cancelToken: cancelToken.current.token
           })
           
@@ -83,11 +82,26 @@ export const useDebounce=(value,delay=500)=>{
     return ()=>{
       clearTimeout(timer)
     }
-    
+
   },[value,delay])
 
   return debouncedValue;
 
 }
 
-// export default useSearch;
+export const useSearchForm=()=>{
+
+  const [searchValue, setSearchValue]= useState('');
+
+  const onSearchChange=useCallback(
+    (e) => {
+        setSearchValue(e.target.value)
+    },
+    [],
+  )    
+
+  return {
+    searchValue,
+    onSearchChange
+  }
+}
